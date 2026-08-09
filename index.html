@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com; connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';">
+<title>Child Height Predictor Calculator</title>
+<meta name="description" content="Free child height predictor calculator. Estimate your child's adult height from parents' heights using the mid-parental height method, plus what affects height and how to support healthy growth.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-P41HN02DDV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-P41HN02DDV');
+</script>
+
+<style>
+  :root{
+    --paper:#FAF7F0; --paper-raised:#FFFFFF; --ink:#191918; --ink-hover:#37372F; --ink-soft:#585448;
+    --muted:#8A8577; --protein:#B23A2F; --carb:#C08A17; --fat:#5C6B2E; --fiber:#3A6B6B;
+    --danger:#B23A2F; --hair:#DEDACD; --height:#3A6B9E; --height-soft:#EAF0F6;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  #root{ max-width:660px; margin:0 auto; padding:0 18px 80px; }
+
+  .site-header{ position:sticky; top:0; z-index:100; background:var(--paper); border-bottom:1.5px solid var(--ink); margin-bottom:22px; padding:14px 0; }
+  .site-header-inner{ display:flex; align-items:center; justify-content:space-between; position:relative; }
+  .site-logo{ display:flex; align-items:center; gap:7px; font-family:'Archivo Black',sans-serif; font-size:14px; text-transform:uppercase; letter-spacing:-0.01em; color:var(--ink); text-decoration:none; white-space:nowrap; }
+  .site-logo .logo-dot{ width:8px; height:8px; border-radius:50%; background:var(--protein); flex-shrink:0; }
+  .current-page{ font-family:'Space Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); display:none; }
+  .tools-dropdown{ position:relative; }
+  .tools-btn{ display:flex; align-items:center; gap:7px; font-family:'Space Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; background:var(--ink); color:var(--paper); border:1.5px solid var(--ink); padding:9px 14px; border-radius:3px; cursor:pointer; transition:background-color 0.15s ease; }
+  .tools-btn:hover{ background:#33332E; }
+  .tools-btn .chevron{ transition:transform 0.15s ease; flex-shrink:0; }
+  .tools-btn[aria-expanded="true"] .chevron{ transform:rotate(180deg); }
+  .tools-menu{ display:none; position:absolute; top:calc(100% + 10px); right:0; width:320px; max-width:calc(100vw - 36px); background:var(--paper-raised); border:1.5px solid var(--ink); box-shadow:0 10px 26px rgba(26,26,22,0.16); padding:8px; z-index:200; max-height:70vh; overflow-y:auto; }
+  .tools-menu.open{ display:block; }
+  .tools-menu-label{ font-family:'Space Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); padding:8px 10px 4px; }
+  .tools-menu a{ display:block; padding:10px; border-radius:3px; text-decoration:none; color:var(--ink); border-bottom:1px solid var(--hair); }
+  .tools-menu a:last-child{ border-bottom:none; }
+  .tools-menu a:hover{ background:var(--paper); }
+  .tools-menu .tm-name{ font-weight:700; font-size:13px; margin-bottom:2px; }
+  .tools-menu .tm-desc{ font-size:11px; color:var(--ink-soft); line-height:1.45; }
+  @media (min-width:640px){ .current-page{ display:block; } }
+
+  .brand{ margin-bottom:22px; }
+  .brand h1{ font-family:'Archivo Black',sans-serif; font-size:21px; letter-spacing:-0.02em; margin:0; text-transform:uppercase; }
+  .brand .sub{ font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:0.04em; margin-top:6px; }
+
+  .card{ background:var(--paper-raised); border:1.5px solid var(--ink); padding:20px; margin-bottom:20px; }
+  .card h3{ font-family:'Space Mono',monospace; font-size:12px; text-transform:uppercase; letter-spacing:0.08em; margin:0 0 14px; color:var(--ink-soft); }
+  .card h2.section-title{ font-family:'Archivo Black',sans-serif; font-size:17px; text-transform:uppercase; letter-spacing:-0.01em; margin:0 0 14px; }
+
+  .segmented{ display:flex; border:1.5px solid var(--ink); border-radius:3px; overflow:hidden; margin-bottom:16px; width:fit-content; }
+  .segmented button{ font-family:'Space Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:0.02em; padding:9px 14px; border:none; background:var(--paper-raised); color:var(--ink); cursor:pointer; transition:background-color 0.15s ease; border-right:1px solid var(--ink); }
+  .segmented button:last-child{ border-right:none; }
+  .segmented button.active{ background:var(--ink); color:var(--paper); }
+  .segmented button:not(.active):hover{ background:var(--hair); }
+
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px; }
+  .field label{ display:block; font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.03em; }
+  .field input{ width:100%; padding:10px; border:1.5px solid var(--hair); border-radius:2px; font-family:'Inter',sans-serif; font-size:14px; background:var(--paper); color:var(--ink); }
+  .field input:focus{ outline:2px solid var(--height); outline-offset:1px; border-color:var(--height); }
+  .field-note{ font-family:'Space Mono',monospace; font-size:10.5px; color:var(--muted); margin-top:-8px; margin-bottom:14px; }
+
+  .calc-btn{ background:var(--ink); color:var(--paper); border:none; padding:13px 20px; font-family:'Space Mono',monospace; font-size:12.5px; text-transform:uppercase; letter-spacing:0.04em; cursor:pointer; border-radius:2px; width:100%; transition:background-color 0.2s ease; }
+  .calc-btn:hover{ background:var(--ink-hover); }
+
+  .result-card{ background:var(--paper-raised); border:3px solid var(--ink); padding:22px; display:none; margin-bottom:20px; }
+  .result-card.show{ display:block; }
+  .result-eyebrow{ font-family:'Space Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--height); margin-bottom:8px; }
+  .result-value{ font-family:'Archivo Black',sans-serif; font-size:34px; letter-spacing:-0.01em; margin-bottom:6px; }
+  .result-basis{ font-family:'Space Mono',monospace; font-size:12px; color:var(--ink-soft); margin-bottom:20px; }
+
+  .range-track{ position:relative; height:8px; background:var(--hair); border-radius:4px; margin:26px 0 8px; }
+  .range-segment{ position:absolute; top:0; height:100%; background:var(--height); border-radius:4px; }
+  .range-bracket{ position:absolute; top:-14px; font-family:'Space Mono',monospace; font-size:11px; font-weight:700; color:var(--ink); white-space:nowrap; }
+  .range-marker{ position:absolute; top:-5px; width:16px; height:16px; margin-left:-8px; border-radius:50%; background:var(--paper-raised); border:3px solid var(--height); }
+
+  .secondary-estimate{ background:var(--height-soft); border-left:3px solid var(--height); padding:12px 14px; margin-top:20px; font-size:12.5px; line-height:1.6; color:var(--ink-soft); display:none; }
+  .secondary-estimate.show{ display:block; }
+  .secondary-estimate b{ color:var(--ink); }
+
+  .howworks-list{ margin:0 0 14px; padding-left:20px; font-size:13.5px; line-height:1.75; color:var(--ink-soft); }
+  .howworks-list li{ margin-bottom:8px; }
+  .howworks-list li b{ color:var(--ink); }
+  .howworks-list li:last-child{ margin-bottom:0; }
+
+  .article-p{ font-size:14px; line-height:1.75; color:var(--ink-soft); margin:0 0 14px; }
+  .article-p:last-child{ margin-bottom:0; }
+  .article-p b{ color:var(--ink); }
+  .article-p a{ color:var(--height); }
+
+  .factor-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .factor-card{ background:var(--paper); border:1.5px solid var(--hair); padding:14px; }
+  .factor-card .fc-icon{ font-size:20px; margin-bottom:8px; display:block; }
+  .factor-card .fc-title{ font-weight:700; font-size:13px; margin-bottom:5px; }
+  .factor-card .fc-desc{ font-size:11.5px; color:var(--ink-soft); line-height:1.5; }
+  @media (max-width:480px){ .factor-grid{ grid-template-columns:1fr; } }
+
+  .nutrient-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .nutrient-table th{ font-family:'Space Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.03em; color:var(--muted); text-align:left; padding:7px 6px; border-bottom:1.5px solid var(--ink); }
+  .nutrient-table td{ padding:9px 6px; border-bottom:1px solid var(--hair); vertical-align:top; line-height:1.5; }
+  .nutrient-table tr:last-child td{ border-bottom:none; }
+  .nutrient-table td.nt-name{ font-weight:700; white-space:nowrap; }
+  .nutrient-table td.nt-sources{ color:var(--ink-soft); }
+
+  .food-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .food-card{ background:var(--height-soft); border:1.5px solid var(--height); padding:12px 14px; }
+  .food-card .fdc-title{ font-weight:700; font-size:12.5px; margin-bottom:4px; }
+  .food-card .fdc-desc{ font-size:11px; color:var(--ink-soft); line-height:1.5; }
+  @media (max-width:480px){ .food-grid{ grid-template-columns:1fr; } }
+
+  .method-note{ background:var(--paper); border:1.5px solid var(--hair); padding:12px 14px; margin-bottom:12px; }
+  .method-note:last-child{ margin-bottom:0; }
+  .method-note .mn-title{ font-weight:700; font-size:13px; margin-bottom:4px; }
+  .method-note .mn-desc{ font-size:12px; color:var(--ink-soft); line-height:1.6; }
+
+  .avg-stat-row{ display:flex; justify-content:space-between; padding:10px 0; border-top:1px solid var(--hair); font-size:13.5px; }
+  .avg-stat-row:first-of-type{ border-top:none; }
+  .avg-stat-row .asr-label{ font-weight:600; }
+  .avg-stat-row .asr-value{ font-family:'Space Mono',monospace; font-weight:700; color:var(--height); }
+
+  .medical-note{ background:var(--preg-soft, #F5EBF0); border-left:3px solid var(--protein); padding:12px 14px; font-size:12.5px; line-height:1.6; color:var(--ink-soft); }
+  .medical-note b{ color:var(--ink); }
+
+  .explore-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .explore-card{ background:var(--paper-raised); border:1.5px solid var(--hair); padding:13px 14px; text-decoration:none; color:var(--ink); display:block; transition:border-color 0.15s ease, background-color 0.15s ease; }
+  .explore-card:hover{ border-color:var(--ink); background:var(--paper); }
+  .explore-card .ec-name{ font-weight:700; font-size:13.5px; margin-bottom:4px; }
+  .explore-card .ec-desc{ font-size:11.5px; color:var(--ink-soft); line-height:1.45; margin-bottom:8px; }
+  .explore-card .ec-arrow{ font-family:'Space Mono',monospace; font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.03em; }
+  @media (max-width:520px){ .explore-grid{ grid-template-columns:1fr; } }
+
+  .disclaimer{ font-family:'Space Mono',monospace; font-size:10.5px; color:var(--muted); margin-top:18px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div id="root">
+
+  <header class="site-header">
+    <div class="site-header-inner">
+      <a href="https://healthylifescale.com" class="site-logo"><span class="logo-dot"></span>Healthy Life Scale</a>
+      <span class="current-page">Height Predictor</span>
+      <div class="tools-dropdown">
+        <button class="tools-btn" id="toolsBtn" aria-haspopup="true" aria-expanded="false">
+          Other Tools
+          <svg class="chevron" width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 3L5 7L9 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="tools-menu" id="toolsMenu">
+          <div class="tools-menu-label">Other tools</div>
+          <a href="https://healthylifescale.com"><div class="tm-name">Calorie Tracker</div><div class="tm-desc">Search 240+ foods and track daily calories, protein, carbs, fat, fiber, sugar & sodium.</div></a>
+          <a href="https://bmi.healthylifescale.com"><div class="tm-name">BMI Calculator</div><div class="tm-desc">Check your Body Mass Index and healthy weight range.</div></a>
+          <a href="https://water.healthylifescale.com"><div class="tm-name">Water Intake</div><div class="tm-desc">Get a daily hydration goal and log glasses as you drink.</div></a>
+          <a href="https://bmr.healthylifescale.com"><div class="tm-name">BMR / TDEE</div><div class="tm-desc">Find your daily calorie needs and a personalized macro split.</div></a>
+          <a href="https://sleep.healthylifescale.com"><div class="tm-name">Sleep Calculator</div><div class="tm-desc">Find your ideal bedtime or wake-up time by sleep cycle.</div></a>
+          <a href="https://duedate.healthylifescale.com"><div class="tm-name">Pregnancy Due Date</div><div class="tm-desc">Estimate your due date and track gestational age week by week.</div></a>
+          <a href="https://pregnancyweight.healthylifescale.com"><div class="tm-name">Pregnancy Weight Gain</div><div class="tm-desc">See your recommended pregnancy weight gain range.</div></a>
+          <a href="https://period.healthylifescale.com"><div class="tm-name">Period Tracker</div><div class="tm-desc">Estimate your next period, ovulation day, and fertile window.</div></a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <script>
+  (function(){
+    var btn = document.getElementById('toolsBtn');
+    var menu = document.getElementById('toolsMenu');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var isOpen = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', function(e){
+      if(!menu.classList.contains('open')) return;
+      if(!menu.contains(e.target) && !btn.contains(e.target)){
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && menu.classList.contains('open')){
+        menu.classList.remove('open');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.focus();
+      }
+    });
+  })();
+  </script>
+
+  <div class="brand">
+    <h1>Child Height Predictor Calculator</h1>
+    <div class="sub">estimate your child's adult height from parents' heights</div>
+  </div>
+
+  <div class="card">
+    <h3>Using the height calculator</h3>
+    <div class="segmented">
+      <button id="unitMetric" class="active">Metric (cm)</button>
+      <button id="unitImperial">Imperial (ft/in)</button>
+    </div>
+
+    <div class="segmented" style="margin-left:0;">
+      <button id="childBoy" class="active">Boy</button>
+      <button id="childGirl">Girl</button>
+    </div>
+
+    <div id="metricParents">
+      <div class="field-row">
+        <div class="field"><label for="fatherCm">Father's height (cm)</label><input type="number" id="fatherCm" placeholder="e.g. 178"></div>
+        <div class="field"><label for="motherCm">Mother's height (cm)</label><input type="number" id="motherCm" placeholder="e.g. 164"></div>
+      </div>
+    </div>
+    <div id="imperialParents" style="display:none;">
+      <div class="field-row">
+        <div class="field"><label for="fatherFt">Father's height (ft)</label><input type="number" id="fatherFt" placeholder="5"></div>
+        <div class="field"><label for="fatherIn">Father's height (in)</label><input type="number" id="fatherIn" placeholder="10"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="motherFt">Mother's height (ft)</label><input type="number" id="motherFt" placeholder="5"></div>
+        <div class="field"><label for="motherIn">Mother's height (in)</label><input type="number" id="motherIn" placeholder="4"></div>
+      </div>
+    </div>
+
+    <div class="field-row" id="currentHeightRow">
+      <div class="field"><label for="childAge">Child's current age (optional)</label><input type="number" id="childAge" step="0.5" placeholder="e.g. 2"></div>
+      <div class="field"><label for="childHeightNow">Current height (optional)</label><input type="number" id="childHeightNow" placeholder="in selected units"></div>
+    </div>
+    <div class="field-note">Age &amp; current height enable a second, informal estimate (see below) &mdash; useful mainly around age 2 for boys or 18 months for girls.</div>
+
+    <button class="calc-btn" id="calcBtn">Calculate estimated adult height</button>
+  </div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-eyebrow">Mid-Parental Height Estimate</div>
+    <div class="result-value" id="rangeValue">&mdash;</div>
+    <div class="result-basis" id="basisLine"></div>
+
+    <div class="range-track" id="rangeTrack">
+      <div class="range-segment" id="rangeSegment"></div>
+      <div class="range-bracket" id="bracketLow" style="left:0%;"></div>
+      <div class="range-bracket" id="bracketHigh" style="right:0%;"></div>
+      <div class="range-marker" id="rangeMarker" style="left:50%;"></div>
+    </div>
+
+    <div class="secondary-estimate" id="secondaryEstimate"></div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">How to predict a child's adult height</h2>
+    <p class="article-p">The height calculator here uses the <b>mid-parental height method</b> (also called the "target height" method) &mdash; the most widely cited approach for estimating a child's eventual adult height from their parents' heights. It's simple, requires no measurements of the child at all, and has been used in pediatric practice for decades.</p>
+    <ol class="howworks-list">
+      <li><b>Add the two parents' heights together</b> (converted to the same unit).</li>
+      <li><b>For a boy:</b> add 13 cm (about 5 in), then divide by 2.</li>
+      <li><b>For a girl:</b> subtract 13 cm (about 5 in), then divide by 2.</li>
+      <li><b>The result is the target height</b> &mdash; the center of the likely adult height range.</li>
+      <li><b>A margin of roughly &plusmn;10 cm (4 in)</b> is applied around that target, reflecting the natural variation this method doesn't capture (genetics beyond parents, nutrition, health).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">How accurate is this height predictor?</h2>
+    <p class="article-p">Mid-parental height is a reasonable starting estimate, not a precise forecast. Height is <b>highly heritable</b> (studies estimate 60&ndash;80% of adult height is explained by genetics), but a single child's final height still commonly lands anywhere within about 10 cm (4 in) of this estimate in either direction. It also assumes the child grows up with adequate nutrition and no health conditions that affect growth &mdash; if either of those isn't the case, actual height can diverge more.</p>
+    <p class="article-p">It also works better as an average across many children than as a guarantee for any one child &mdash; genetics alone doesn't set a fixed number, it sets a <i>likely range</i>.</p>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Other methods for predicting height</h2>
+    <div class="method-note">
+      <div class="mn-title">Mid-Parental Height (used above)</div>
+      <div class="mn-desc">Based only on parents' heights and the child's sex. Simple, fast, and doesn't require measuring the child at all.</div>
+    </div>
+    <div class="method-note">
+      <div class="mn-title">Bone age / growth chart methods</div>
+      <div class="mn-desc">Pediatricians can use a child's current height, weight, age, and sometimes an X-ray-based "bone age" against standardized growth curves for a more individualized estimate. These require clinical measurement and interpretation, so they aren't available in a simple online calculator.</div>
+    </div>
+    <div class="method-note">
+      <div class="mn-title">Percentile tracking</div>
+      <div class="mn-desc">Most children track along a fairly consistent percentile line on a growth chart through childhood. A doctor plotting several measurements over time can often estimate an adult height range by extending that line &mdash; more accurate than a single mid-parental calculation, but it requires ongoing measurements.</div>
+    </div>
+    <p class="article-p" style="margin-top:12px;">Want to check your own current numbers instead of predicting a child's future height? Try the <a href="https://bmi.healthylifescale.com">BMI Calculator</a>.</p>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Factors affecting height</h2>
+    <p class="article-p">A child's eventual height is shaped by more than genetics alone. The main contributors:</p>
+    <div class="factor-grid">
+      <div class="factor-card">
+        <span class="fc-icon">&#129516;</span>
+        <div class="fc-title">Genetics</div>
+        <div class="fc-desc">The single biggest factor &mdash; parents' heights strongly predict a child's likely range, though not an exact number.</div>
+      </div>
+      <div class="factor-card">
+        <span class="fc-icon">&#127838;</span>
+        <div class="fc-title">Nutrition</div>
+        <div class="fc-desc">Inadequate protein, calories, or key micronutrients during childhood can measurably slow growth and limit final height.</div>
+      </div>
+      <div class="factor-card">
+        <span class="fc-icon">&#128564;</span>
+        <div class="fc-title">Sleep &amp; hormones</div>
+        <div class="fc-desc">Growth hormone is released primarily during deep sleep &mdash; consistent, adequate sleep supports normal growth patterns.</div>
+      </div>
+      <div class="factor-card">
+        <span class="fc-icon">&#127947;</span>
+        <div class="fc-title">Physical activity</div>
+        <div class="fc-desc">Regular activity supports healthy bone and muscle development, complementing (not replacing) good nutrition.</div>
+      </div>
+      <div class="factor-card">
+        <span class="fc-icon">&#127973;</span>
+        <div class="fc-title">Chronic illness</div>
+        <div class="fc-desc">Some chronic conditions and hormone disorders can affect growth &mdash; a doctor should evaluate any child growing notably slower than peers.</div>
+      </div>
+      <div class="factor-card">
+        <span class="fc-icon">&#127757;</span>
+        <div class="fc-title">Environment</div>
+        <div class="fc-desc">Access to healthcare, consistent nutrition, and a stable environment in early childhood all measurably influence growth outcomes.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Nutrients required for healthy growth</h2>
+    <p class="article-p">Height growth is fueled by specific nutrients working together &mdash; no single "magic" nutrient does it alone.</p>
+    <table class="nutrient-table">
+      <thead><tr><th>Nutrient</th><th>Why it matters</th><th>Good sources</th></tr></thead>
+      <tbody>
+        <tr><td class="nt-name">Protein</td><td>Builds and repairs the tissue that makes up bone, muscle, and cartilage</td><td class="nt-sources">Meat, fish, eggs, dairy, legumes, tofu</td></tr>
+        <tr><td class="nt-name">Calcium</td><td>Core mineral for bone density and length</td><td class="nt-sources">Dairy, fortified plant milks, leafy greens, tofu</td></tr>
+        <tr><td class="nt-name">Vitamin D</td><td>Needed for the body to actually absorb and use calcium</td><td class="nt-sources">Sunlight, fatty fish, fortified milk/cereal, eggs</td></tr>
+        <tr><td class="nt-name">Zinc</td><td>Supports cell growth and division, including in growth plates</td><td class="nt-sources">Meat, shellfish, beans, nuts, seeds, dairy</td></tr>
+        <tr><td class="nt-name">Vitamin A</td><td>Supports bone growth and cell development</td><td class="nt-sources">Carrots, sweet potatoes, spinach, eggs, dairy</td></tr>
+        <tr><td class="nt-name">Iron</td><td>Supports oxygen delivery for growing tissue; deficiency can slow growth</td><td class="nt-sources">Red meat, poultry, beans, spinach, fortified grains</td></tr>
+        <tr><td class="nt-name">Iodine</td><td>Needed for thyroid hormone, which regulates growth</td><td class="nt-sources">Iodized salt, dairy, seafood, eggs</td></tr>
+        <tr><td class="nt-name">Omega-3s</td><td>Supports overall development, including bone health</td><td class="nt-sources">Fatty fish, walnuts, flaxseed, chia seeds</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Foods that support healthy growth</h2>
+    <div class="food-grid">
+      <div class="food-card"><div class="fdc-title">Dairy &amp; eggs</div><div class="fdc-desc">Calcium, protein, vitamin D, and B12 in one package &mdash; milk, yogurt, cheese, and eggs are foundational for growing children.</div></div>
+      <div class="food-card"><div class="fdc-title">Lean meats &amp; fish</div><div class="fdc-desc">High-quality protein, iron, zinc, and (in fatty fish) omega-3s and vitamin D.</div></div>
+      <div class="food-card"><div class="fdc-title">Leafy greens &amp; vegetables</div><div class="fdc-desc">Calcium, vitamin A, vitamin K, and folate &mdash; spinach, kale, and broccoli are standouts.</div></div>
+      <div class="food-card"><div class="fdc-title">Legumes &amp; nuts</div><div class="fdc-desc">Plant protein, zinc, iron, and healthy fats &mdash; beans, lentils, almonds, and walnuts.</div></div>
+      <div class="food-card"><div class="fdc-title">Fruits</div><div class="fdc-desc">Vitamin C (helps collagen formation for bone and cartilage) plus fiber and antioxidants.</div></div>
+      <div class="food-card"><div class="fdc-title">Whole grains</div><div class="fdc-desc">Steady energy for growth, plus B vitamins, iron, and fiber &mdash; oats, brown rice, whole wheat.</div></div>
+    </div>
+    <p class="article-p" style="margin-top:14px;">Want to check whether a child or teen's diet is actually hitting these targets? Log meals in the <a href="https://healthylifescale.com">Calorie Tracker</a> to see protein and micronutrient-relevant totals.</p>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Average adult height (United States)</h2>
+    <div class="avg-stat-row"><span class="asr-label">Average adult male height</span><span class="asr-value">~5'9" (175 cm)</span></div>
+    <div class="avg-stat-row"><span class="asr-label">Average adult female height</span><span class="asr-value">~5'4" (162 cm)</span></div>
+    <p class="article-p" style="margin-top:14px;">These are broad population averages (commonly cited from U.S. national health survey data) &mdash; individual height varies widely around them, shaped by all the genetic and environmental factors above.</p>
+  </div>
+
+  <div class="medical-note">
+    <b>Not medical advice:</b> This calculator gives a rough, population-based estimate only. If you're concerned about a child's growth rate — whether notably fast, slow, or off their typical percentile line — a pediatrician can plot accurate growth charts and check for underlying causes.
+  </div>
+
+  <div class="card" style="margin-top:20px;">
+    <h3>Explore other tools</h3>
+    <div class="explore-grid">
+      <a href="https://healthylifescale.com" class="explore-card"><div class="ec-name">Calorie Tracker</div><div class="ec-desc">Search 240+ foods and track daily calories, protein, carbs, fat, fiber, sugar & sodium.</div><div class="ec-arrow">Open &rarr;</div></a>
+      <a href="https://bmi.healthylifescale.com" class="explore-card"><div class="ec-name">BMI Calculator</div><div class="ec-desc">Check your Body Mass Index and healthy weight range.</div><div class="ec-arrow">Open &rarr;</div></a>
+      <a href="https://water.healthylifescale.com" class="explore-card"><div class="ec-name">Water Intake</div><div class="ec-desc">Get a daily hydration goal and log glasses as you drink.</div><div class="ec-arrow">Open &rarr;</div></a>
+      <a href="https://bmr.healthylifescale.com" class="explore-card"><div class="ec-name">BMR / TDEE</div><div class="ec-desc">Find your daily calorie needs and a personalized macro split.</div><div class="ec-arrow">Open &rarr;</div></a>
+      <a href="https://sleep.healthylifescale.com" class="explore-card"><div class="ec-name">Sleep Calculator</div><div class="ec-desc">Find your ideal bedtime or wake-up time by sleep cycle.</div><div class="ec-arrow">Open &rarr;</div></a>
+      <a href="https://duedate.healthylifescale.com" class="explore-card"><div class="ec-name">Pregnancy Due Date</div><div class="ec-desc">Estimate your due date and track gestational age week by week.</div><div class="ec-arrow">Open &rarr;</div></a>
+      <a href="https://pregnancyweight.healthylifescale.com" class="explore-card"><div class="ec-name">Pregnancy Weight Gain</div><div class="ec-desc">See your recommended pregnancy weight gain range.</div><div class="ec-arrow">Open &rarr;</div></a>
+      <a href="https://period.healthylifescale.com" class="explore-card"><div class="ec-name">Period Tracker</div><div class="ec-desc">Estimate your next period, ovulation day, and fertile window.</div><div class="ec-arrow">Open &rarr;</div></a>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    Estimates use the mid-parental height method, a general population-based formula. Individual results vary; this is not medical advice or a diagnostic tool.
+  </div>
+
+</div>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  let unit = 'metric';
+  let childSex = 'boy';
+
+  $('unitMetric').addEventListener('click', ()=>{
+    unit='metric'; $('unitMetric').classList.add('active'); $('unitImperial').classList.remove('active');
+    $('metricParents').style.display='block'; $('imperialParents').style.display='none';
+  });
+  $('unitImperial').addEventListener('click', ()=>{
+    unit='imperial'; $('unitImperial').classList.add('active'); $('unitMetric').classList.remove('active');
+    $('imperialParents').style.display='block'; $('metricParents').style.display='none';
+  });
+  $('childBoy').addEventListener('click', ()=>{ childSex='boy'; $('childBoy').classList.add('active'); $('childGirl').classList.remove('active'); });
+  $('childGirl').addEventListener('click', ()=>{ childSex='girl'; $('childGirl').classList.add('active'); $('childBoy').classList.remove('active'); });
+
+  function cmToFtIn(cm){
+    const totalIn = cm / 2.54;
+    const ft = Math.floor(totalIn/12);
+    const inch = Math.round(totalIn - ft*12);
+    return ft + "'" + inch + '"';
+  }
+
+  $('calcBtn').addEventListener('click', ()=>{
+    let fatherCm, motherCm;
+    if(unit === 'metric'){
+      fatherCm = parseFloat($('fatherCm').value);
+      motherCm = parseFloat($('motherCm').value);
+    } else {
+      const fFt = parseFloat($('fatherFt').value) || 0;
+      const fIn = parseFloat($('fatherIn').value) || 0;
+      const mFt = parseFloat($('motherFt').value) || 0;
+      const mIn = parseFloat($('motherIn').value) || 0;
+      fatherCm = (fFt*12 + fIn) * 2.54;
+      motherCm = (mFt*12 + mIn) * 2.54;
+    }
+    if(!fatherCm || !motherCm){ alert("Please enter both parents' heights."); return; }
+
+    let targetCm;
+    if(childSex === 'boy'){ targetCm = (fatherCm + motherCm + 13) / 2; }
+    else { targetCm = (fatherCm + motherCm - 13) / 2; }
+
+    const lowCm = targetCm - 10;
+    const highCm = targetCm + 10;
+
+    let display, lowDisp, highDisp, unitLabel;
+    if(unit === 'metric'){
+      display = targetCm.toFixed(1) + ' cm';
+      lowDisp = lowCm.toFixed(0) + ' cm'; highDisp = highCm.toFixed(0) + ' cm';
+      unitLabel = 'cm';
+    } else {
+      display = cmToFtIn(targetCm);
+      lowDisp = cmToFtIn(lowCm); highDisp = cmToFtIn(highCm);
+      unitLabel = 'ft/in';
+    }
+
+    $('rangeValue').textContent = display;
+    $('basisLine').innerHTML = 'Likely adult height range: <b>' + lowDisp + ' \u2013 ' + highDisp + '</b> (' + (childSex==='boy'?'boy':'girl') + ')';
+
+    // range bar: track spans lowCm-10 to highCm+10 for visual padding
+    const trackMin = lowCm - 8;
+    const trackMax = highCm + 8;
+    const lowPct = ((lowCm-trackMin)/(trackMax-trackMin))*100;
+    const highPct = ((highCm-trackMin)/(trackMax-trackMin))*100;
+    const targetPct = ((targetCm-trackMin)/(trackMax-trackMin))*100;
+
+    $('rangeSegment').style.left = lowPct+'%';
+    $('rangeSegment').style.width = (highPct-lowPct)+'%';
+    $('bracketLow').style.left = lowPct+'%';
+    $('bracketLow').style.transform = 'translateX(-2px)';
+    $('bracketLow').textContent = lowDisp;
+    $('bracketHigh').style.left = highPct+'%';
+    $('bracketHigh').style.right = 'auto';
+    $('bracketHigh').style.transform = 'translateX(-100%) translateX(2px)';
+    $('bracketHigh').textContent = highDisp;
+    $('rangeMarker').style.left = targetPct+'%';
+
+    // secondary "doubling rule" estimate
+    const age = parseFloat($('childAge').value);
+    const heightNow = parseFloat($('childHeightNow').value);
+    const secBox = $('secondaryEstimate');
+    if(age && heightNow){
+      let heightNowCm = heightNow;
+      if(unit === 'imperial'){ heightNowCm = heightNow * 2.54; } // assumes entered in inches for imperial mode
+
+      const idealAge = childSex === 'boy' ? 2 : 1.5;
+      const ageDiff = Math.abs(age - idealAge);
+      const doubledCm = heightNowCm * 2;
+      const doubledDisplay = unit === 'metric' ? doubledCm.toFixed(1)+' cm' : cmToFtIn(doubledCm);
+
+      if(ageDiff <= 0.5){
+        secBox.innerHTML = '<b>Rule-of-thumb estimate:</b> at close to the reference age (' + idealAge + ' for ' + (childSex==='boy'?'boys':'girls') + '), doubling current height gives an informal estimate of <b>' + doubledDisplay + '</b>. This is a rough traditional rule, less rigorous than the mid-parental method above.';
+      } else {
+        secBox.innerHTML = '<b>Rule-of-thumb note:</b> the "double the height at age ' + idealAge + '" rule works best right around that age. At age ' + age + ', this rough estimate (' + doubledDisplay + ') is less reliable \u2014 the mid-parental estimate above is more appropriate here.';
+      }
+      secBox.classList.add('show');
+    } else {
+      secBox.classList.remove('show');
+    }
+
+    $('resultCard').classList.add('show');
+  });
+})();
+</script>
+</body>
+</html>
